@@ -28,6 +28,8 @@ import {
   TrendingDown,
   DollarSign,
   Search,
+  Menu,
+  X,
 } from "lucide-react";
 
 // Mock Data
@@ -78,6 +80,7 @@ const employeesData = [
 export default function DashboardApp() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -177,39 +180,59 @@ export default function DashboardApp() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col">
-        <div className="p-6 flex items-center gap-3 text-white">
-          <LayoutDashboard className="w-6 h-6 text-emerald-400" />
-          <span className="text-lg font-bold tracking-tight">
-            Gestão Integrada
-          </span>
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-300 ease-in-out
+        md:relative md:translate-x-0
+        ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+      `}>
+        <div className="p-6 flex items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            <LayoutDashboard className="w-6 h-6 text-emerald-400" />
+            <span className="text-lg font-bold tracking-tight">
+              Gestão Integrada
+            </span>
+          </div>
+          <button 
+            className="md:hidden p-1 text-slate-400 hover:text-white rounded-lg"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 mt-4">
+        <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
           <NavItem
             icon={<LayoutDashboard size={20} />}
             label="Dashboard"
             active={activeTab === "dashboard"}
-            onClick={() => setActiveTab("dashboard")}
+            onClick={() => { setActiveTab("dashboard"); setIsMobileMenuOpen(false); }}
           />
           <NavItem
             icon={<FileSpreadsheet size={20} />}
             label="Importar Planilhas"
             active={activeTab === "import"}
-            onClick={() => setActiveTab("import")}
+            onClick={() => { setActiveTab("import"); setIsMobileMenuOpen(false); }}
           />
           <NavItem
             icon={<Users size={20} />}
             label="Folha & Pessoal"
             active={activeTab === "employees"}
-            onClick={() => setActiveTab("employees")}
+            onClick={() => { setActiveTab("employees"); setIsMobileMenuOpen(false); }}
           />
           <NavItem
             icon={<FileText size={20} />}
             label="Relatórios"
             active={activeTab === "reports"}
-            onClick={() => setActiveTab("reports")}
+            onClick={() => { setActiveTab("reports"); setIsMobileMenuOpen(false); }}
           />
         </nav>
 
@@ -218,7 +241,7 @@ export default function DashboardApp() {
             icon={<Settings size={20} />}
             label="Configurações"
             active={activeTab === "settings"}
-            onClick={() => setActiveTab("settings")}
+            onClick={() => { setActiveTab("settings"); setIsMobileMenuOpen(false); }}
           />
           <button
             onClick={() => setIsAuthenticated(false)}
@@ -231,33 +254,41 @@ export default function DashboardApp() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shrink-0">
-          <h2 className="text-xl font-semibold text-slate-800 capitalize">
-            {activeTab === "dashboard"
-              ? "Visão Geral"
-              : activeTab.replace("-", " ")}
-          </h2>
-          <div className="flex items-center gap-4">
+        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-10 w-full overflow-hidden">
+          <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-1.5 sm:p-2 -ml-1 text-slate-600 hover:bg-slate-100 rounded-lg shrink-0"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-800 capitalize truncate">
+              {activeTab === "dashboard"
+                ? "Visão Geral"
+                : activeTab.replace("-", " ")}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2 md:gap-4 ml-2">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
-                className="pl-9 pr-4 py-1.5 bg-slate-100 border-transparent rounded-full text-sm focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+                className="pl-8 pr-3 py-1.5 w-24 sm:w-48 lg:w-64 bg-slate-100 border-transparent rounded-full text-xs sm:text-sm focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
               />
             </div>
-            <div className="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-sm">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">
               A
             </div>
           </div>
         </header>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-auto p-8">
+        <div className="flex-1 overflow-auto p-4 md:p-8">
           {activeTab === "dashboard" && <DashboardView searchTerm={globalSearch} />}
           {activeTab === "import" && <ImportView />}
           {activeTab === "employees" && <EmployeesView searchTerm={globalSearch} />}
